@@ -1,0 +1,143 @@
+.custom-select {
+  display: inline-block;
+  width: 100%;
+  height: calc(2.25rem + 2px);
+  padding: 0.375rem 1.75rem 0.375rem 0.75rem;
+  line-height: 1.5;
+  color: #495057;
+  vertical-align: middle;
+  background: #fff url(/img/download.svg) no-repeat right 0.75rem center;
+  background-size: 8px 10px;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.top-row {
+  background-color: #c8c8c8;
+  padding: 15px;
+  border-radius: 5px;
+}
+
+table thead tr {
+  border-radius: 5px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+label {
+  padding-right: 15px;
+}
+
+.color-picker {
+  background-color: red;
+}
+
+#color-input,
+#wordBackground,
+#textBackground,
+#guessBackground {
+  height: 41px;
+}
+
+#new-game {
+  margin-left: 53px;
+  background-color: #008CBA;
+  color: #ffff;
+}
+
+.guess-box {
+  width: 50px;
+  margin: 0 auto 20px;
+  padding: 10px;
+  border: 2px solid #000;
+  text-align: center;
+}
+
+.guess-button {
+  padding: 10px 20px;
+  background-color: #008CBA;
+  border: none;
+  border-radius: 1px;
+  color: white;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal {
+  background: white;
+  padding: 20px;
+  border-radius: 5px;
+  width: 80%;
+}
+
+.letter-container {
+  margin: 10px 0;
+}
+
+.letter-box {
+  display: inline-block;
+  width: 50px;
+  height: 65px;
+  line-height: 50px;
+  margin: 2px;
+  text-align: center;
+  font-size: 32px;
+  text-transform: uppercase;
+}
+
+#guessDiv {
+  float: right;
+  display: flex;
+}
+
+.btn-close {
+  float: right;
+}
+
+#game-view {
+  width: 90%;
+  height: auto;
+  margin-left: 75px;
+  background: gainsboro;
+}
+
+.guess-letterbox {
+  display: flex;
+  width: 40px;
+  height: 50px;
+  line-height: 50px;
+  margin: 2px;
+  text-align: center;
+  font-size: 32px;
+  text-transform: uppercase;
+}
+
+#fetchGameButton.btn-close {
+  width: 20px;
+  height: 20px;
+  background-color: red;
+  color: white;
+  font-size: 20px;
+  line-height: 1;
+  text-align: center;
+  opacity: 1;
+  background-image: none;
+  border-radius: 5px;
+}
