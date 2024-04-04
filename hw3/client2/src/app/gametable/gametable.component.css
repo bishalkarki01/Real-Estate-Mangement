@@ -1,0 +1,34 @@
+
+/* Styles for the phrase container */
+.phrase-container {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    width: 450px;
+  }
+  
+  /* Styles for each letter box */
+  .letter-box {
+    display: inline-block;
+    width: 40px; 
+    height: 40px; 
+    line-height: 40px; 
+    text-align: center;
+    font-size: 24px; 
+    margin-right: 2px; 
+    border: 1px solid #495057; 
+  }
+  
+  /* Styles for gaps */
+  .letter-box.gap {
+    background-color: #ffffff; 
+  }
+    
+  #gameTable {
+    width: calc(100% - 40px); 
+    margin: 0 auto; 
+    padding: 0;
+    border-radius: 0.25rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  }
+  
+  
