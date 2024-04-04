@@ -1,0 +1,20 @@
+<div class="form-container">
+    <h2 class="form-title">Login to your account</h2>
+    <form (ngSubmit)="submitLoginForm()">
+      <div class="input-container">
+        <label for="email">Email:</label>
+        <input type="email" [(ngModel)]="user.email" name="email" id="email" autocomplete="email" required>
+      </div>
+      <div class="input-container">
+        <label for="password">Password:</label>
+        <input type="password" [(ngModel)]="user.password" name="password" id="password" autocomplete="current-password" required>
+      </div>
+      <div *ngIf="errorMessage" class="error-message">
+        {{ errorMessage }}
+      </div>
+      <div class="input-container">
+        <input class="submit-button" type="submit" value="Login" name="login" id="login">
+      </div>
+    </form>
+  </div>
+  

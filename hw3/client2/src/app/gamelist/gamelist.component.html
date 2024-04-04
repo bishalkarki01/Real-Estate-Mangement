@@ -1,0 +1,18 @@
+<nav class="navbar navbar-expand navbar-light" style="background-color: #1D1842;">
+    <div class="container-fluid">
+      <label class="navbar-brand mb-0 h1 text-white">Wheel of Fortune</label>
+        <div >
+          <span class="user">Welcome: {{ userEmail }}</span>
+          <button id="logout" class="btn btn-danger"(click)="logout()">Logout</button>
+        </div>
+      </div>
+    
+  </nav>
+  <div>
+    <app-newgame></app-newgame>
+  </div>
+  <div>
+    <app-gametable></app-gametable>
+  </div>
+  
+  
