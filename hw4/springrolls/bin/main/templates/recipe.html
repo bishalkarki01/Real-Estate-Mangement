@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${recipe.title} + ' - Recipe Book'">Recipe Title - Recipe Book</title>
+     <link rel="stylesheet" th:href="@{/css/style.css}" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+   
+</head>
+<body>
+<div class="topnav">
+<h2 class="title">Recipe Book </h2>
+</div>
+<div class="container">
+
+<button onclick="window.location.href='/recipes'" class="btn btn-primary" style="margin-top: 60px; margin-bottom: 10px;">Return</button>
+
+
+    <h2 th:text="${recipe.title}">Recipe Name</h2>
+<div class="recipe-list-container">
+    <form th:action="@{/recipes/{id}/ingredients(id=${recipe.id})}" method="post" th:object="${ingredient}" class="ingredient-form">
+        <input type="text" th:field="*{name}" class="form-control" placeholder="Name" required>
+        <input type="number" th:field="*{amount}" class="form-control" placeholder="Amount" required>
+        <input type="text" th:field="*{unit}" class="form-control" placeholder="Units" required>
+        <button type="submit" class="btn btn-primary">Add Ingredient</button>
+    </form>
+</div>
+    <!-- List of ingredients -->
+    <h3 class="ing">Ingredients</h3>
+    <table class="ingredient-table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Amount</th>
+                <th>Units</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+    <tr style="border-bottom: 1pt solid black;" th:each="ingredient, iterStat : ${recipe.ingredients}">
+        <td th:text="${ingredient.name}">Ingredient Name</td>
+        <td th:text="${ingredient.amount}">Amount</td>
+        <td th:text="${ingredient.unit}">Units</td>
+        <td>
+            <form th:action="@{/recipes/{recipeId}/ingredients/{ingredientId}/delete(recipeId=${recipe.id}, ingredientId=${iterStat.index})}" method="post">
+                <button type="submit" class="delete-ingredient-button">X</button>
+            </form>
+        </td>
+    </tr>
+</tbody>
+    </table>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.9.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+</html>

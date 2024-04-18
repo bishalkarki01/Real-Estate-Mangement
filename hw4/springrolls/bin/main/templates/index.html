@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe Book</title>
+    <!-- Include Bootstrap for quick styling -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+</head>
+<body>
+<div class="topnav">
+<h2 class="title">Recipe Book </h2>
+</div>
+<div class="container mt-5">
+    <div class="my-3">
+    <label>Recipe Name </label>
+        <form th:action="@{/recipes}" method="post">
+            <input type="text" name="title" class="form-control" placeholder="Recipe Name" required>
+            <button type="submit" class="create-recipe-button">Create Recipe</button>
+        </form>
+    </div>
+    <div class="recipe-list-container">
+        <h2>Recipes</h2>
+        <ul class="recipe-list">
+            <li th:each="recipe : ${recipes}" class="recipe-item">
+                <a th:href="@{/recipes/{id}(id=${recipe.id})}" th:text="${recipe.title}" class="recipe-title">Recipe Name</a>
+                <form th:action="@{/recipes/delete/{id}(id=${recipe.id})}" method="post" class="delete-form">
+                    <button type="submit" class="delete-recipe-button">x</button>
+                </form>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.9.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+</html>
