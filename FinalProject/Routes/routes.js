@@ -3,6 +3,28 @@ const router = express.Router();
 const multer = require('multer');
 const User= require('../Model/User');
 const jwt = require('jsonwebtoken');
+
+const secretKey = 'your_jwt_secret';
+
+
+// Middleware function to verify JWT token
+const verifyToken = (req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1];
+
+  if (!token) {
+    return res.status(403).json({ message: 'No token provided' });
+  }
+
+  jwt.verify(token, secretKey, (err, decoded) => {
+    if (err) {
+      return res.status(403).json({ message: 'Failed to authenticate token' });
+    }
+
+    // Attach the decoded payload to the request object
+    req.user = decoded;
+    next();
+  });
+};
 //For register
 router.post('/api/register', async (req, res) => {
   try {
@@ -27,7 +49,7 @@ router.post('/api/login', async (req, res, next) => {
       await new Promise((resolve, reject) => {
         req.session.regenerate((err) => {
           if (err) reject(err);
-          else resolve(); 
+          else resolve();
         });
       });
       req.session.user = {
@@ -48,7 +70,7 @@ router.post('/api/login', async (req, res, next) => {
         { expiresIn: '1h' }
       );
       const responseData = { ...user._doc, token };
-      delete responseData.password; 
+      delete responseData.password;
       res.json(responseData);
     } else {
       if (user && !user.isActive) {
@@ -134,7 +156,7 @@ router.patch('/api/users/:id',async (req, res) => {
 });
 
 //Get details of currentuser
-router.get('/api/currentUser', async (req, res) => {
+router.get('/api/currentUser',verifyToken, async (req, res) => {
   if (req.session && req.session.user && req.session.user._id) {
     try {
       const user = await User.findById(req.session.user._id);
