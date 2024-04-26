@@ -7,23 +7,31 @@ const jwt = require('jsonwebtoken');
 const secretKey = 'your_jwt_secret';
 
 
-// Middleware function to verify JWT token
 const verifyToken = (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];
 
   if (!token) {
-    return res.status(403).json({ message: 'No token provided' });
+    return res.status(403).json({ message: 'Sorry !! You are not authorized ' });
   }
 
   jwt.verify(token, secretKey, (err, decoded) => {
     if (err) {
       return res.status(403).json({ message: 'Failed to authenticate token' });
     }
-
-    // Attach the decoded payload to the request object
     req.user = decoded;
+    req.user.role = decoded.userType;
     next();
   });
+};
+
+
+const checkRole = (allowedRoles) => {
+  return (req, res, next) => {
+    if (!allowedRoles.includes(req.user.userType)) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+    next();
+  };
 };
 //For register
 router.post('/api/register', async (req, res) => {
@@ -98,7 +106,7 @@ router.post('/api/logout', (req, res) => {
 });
 
  //ToGet All Users
- router.get('/api/users', (req, res) => {
+router.get('/api/users', verifyToken, checkRole(['admin']), (req, res) => {
   const userIdInSession = req.session.user?._id;
   if (!userIdInSession) {
     return res.status(401).send({ message: 'No user logged in' });
@@ -156,7 +164,7 @@ router.patch('/api/users/:id',async (req, res) => {
 });
 
 //Get details of currentuser
-router.get('/api/currentUser',verifyToken, async (req, res) => {
+router.get('/api/currentUser', async (req, res) => {
   if (req.session && req.session.user && req.session.user._id) {
     try {
       const user = await User.findById(req.session.user._id);

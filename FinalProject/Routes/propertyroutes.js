@@ -9,8 +9,41 @@ const Property = require('../Model/Property')
 const Interest = require('../Model/Interested')
 const ObjectId = require('mongoose').Types.ObjectId;
 const NodeGeocoder = require('node-geocoder');
-
 const fs = require('fs');
+const jwt = require('jsonwebtoken');
+const secretKey = 'your_jwt_secret';
+
+// Middleware function to verify JWT token
+const verifyToken = (req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1];
+
+  if (!token) {
+    return res.status(403).json({ message: 'Sorry you are not Authorized' });
+  }
+
+  jwt.verify(token, secretKey, (err, decoded) => {
+    if (err) {
+      return res.status(403).json({ message: 'Failed to authenticate token' });
+    }
+
+    // Attach the decoded payload to the request object
+    req.user = {
+      _id: decoded._id,
+      userType: decoded.userType
+    };
+    next();
+  });
+};
+
+// Middleware function to check user role
+const checkRole = (allowedRoles) => {
+  return (req, res, next) => {
+    if (!allowedRoles.includes(req.user.userType)) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+    next();
+  };
+};
 
 const options = {
   provider: 'google',
@@ -79,104 +112,89 @@ const storage = multer.diskStorage({
       });
   });
   
-  //To get properties
-  router.get('/api/properties', async (req, res) => {
-    try {
-      const properties = await Property.find({ isActive: true }).sort({ _id: -1 });
-      res.json(properties);
-    } catch (err) {
-      res.status(500).send({ message: 'Error fetching properties', error: err.message });
-    }
-  });
-  
-  //to show the list of properties
-  router.get('/api/propertylist', async (req, res) => {
-    try {
-      const properties = await Property.find({}).sort({ _id: -1 });
-      res.json(properties);
-    } catch (err) {
-      res.status(500).send({ message: 'Error fetching properties' });
-    }
-  });
+// To show the list of properties (only for admin users)
+router.get('/api/propertylist', verifyToken, checkRole(['admin']), async (req, res) => {
+  try {
+    const properties = await Property.find({}).sort({ _id: -1 });
+    res.json(properties);
+  } catch (err) {
+    res.status(500).send({ message: 'Error fetching properties' });
+  }
+});
     
-  //delete property
-  router.delete('/api/properties/:id', async (req, res) => {
-    try {
-      const { id } = req.params;
-      const property = await Property.findByIdAndDelete(id);
-  
-      if (!property) {
-        res.status(404).send({ message: 'Property not found' });
-      } else {
-        res.status(200).send({ message: 'Property deleted successfully' });
-      }
-    } catch (error) {
-      res.status(500).send({ message: 'Failed to delete the property', error: error.message });
-    }
-  });
-  
-  //update property status 
-  router.patch('/api/properties/:id/status', (req, res) => {
-    Property.findByIdAndUpdate(req.params.id, { isActive: req.body.isActive }, { new: true })
-      .then(updatedProperty => res.json(updatedProperty))
-      .catch(err => res.status(400).json('Error: ' + err));
-  });
-  
-  //property for biyers
-  router.get('/api/buyproperty', async (req, res) => {
-    try {
-      const sessionData = req.session.user;
-      const userIdInSession = sessionData._id;
-      if (!userIdInSession) {
-        return res.status(401).send({ message: 'No user logged in' });
-      }
-      const properties = await Property.find({
-        isActive: true,
-        userId: { $ne: userIdInSession } 
-      }).sort({ _id: -1 });
-  
-      res.json(properties);
-    } catch (err) {
-      res.status(500).send({ message: 'Error fetching properties', error: err.message });
-    }
-  });
-  
-  //property of agent self
-  router.get('/api/myPropertylist', async (req, res) => {
-    try {
-      const sessionData = req.session.user;
-      const userIdInSession = sessionData._id;
-      if (!userIdInSession) {
-        return res.status(401).send({ message: 'No user logged in' });
-      }
-      const properties = await Property.find({
-        userId: userIdInSession
-      }).sort({ _id: -1 });
-  
-      res.json(properties);
-    } catch (err) {
-      res.status(500).send({ message: 'Error fetching properties', error: err.message });
-    }
-  });
-  
-  //get interested properties
-  router.get('/api/interestedProperties', async (req, res) => {
-    try {
-      if (!req.session.user || !req.session.user._id) {
-        return res.status(401).send({ message: 'User not authenticated' });
-      }
-      const userId = req.session.user._id;
-      console.log("userID", userId);
+// Delete property (only for authenticated users)
+router.delete('/api/properties/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const property = await Property.findByIdAndDelete(id);
 
-      const properties = await Interest.find({OwnID:userId});
-      properties.forEach(property => console.log("Property OwnID:", property.OwnID));
-  
-      res.json(properties);
-    } catch (err) {
-      console.error("Failed to fetch properties:", err);
-      res.status(500).send({ message: 'Error fetching properties', error: err.message });
+    if (!property) {
+      res.status(404).send({ message: 'Property not found' });
+    } else {
+      res.status(200).send({ message: 'Property deleted successfully' });
     }
-  });
+  } catch (error) {
+    res.status(500).send({ message: 'Failed to delete the property', error: error.message });
+  }
+});
+  
+// Update property status (only for authenticated users)
+router.patch('/api/properties/:id/status', (req, res) => {
+  Property.findByIdAndUpdate(req.params.id, { isActive: req.body.isActive }, { new: true })
+    .then(updatedProperty => res.json(updatedProperty))
+    .catch(err => res.status(400).json('Error: ' + err));
+});
+  
+// Get properties for buyers (only for authenticated agents and users)
+router.get('/api/buyproperty', verifyToken, checkRole(['agent', 'user']), async (req, res) => {
+  try {
+    const sessionData = req.session.user;
+    const userIdInSession = sessionData._id;
+    if (!userIdInSession) {
+      return res.status(401).send({ message: 'No user logged in' });
+    }
+    const properties = await Property.find({
+      isActive: true,
+      userId: { $ne: userIdInSession }
+    }).sort({ _id: -1 });
+
+    res.json(properties);
+  } catch (err) {
+    res.status(500).send({ message: 'Error fetching properties', error: err.message });
+  }
+});
+
+  
+// Get agent's own properties (only for authenticated agents)
+router.get('/api/myPropertylist', verifyToken, checkRole(['agent']), async (req, res) => {
+  try {
+    const sessionData = req.session.user;
+    const userIdInSession = sessionData._id;
+    if (!userIdInSession) {
+      return res.status(401).send({ message: 'No user logged in' });
+    }
+    const properties = await Property.find({ userId: userIdInSession }).sort({ _id: -1 });
+    res.json(properties);
+  } catch (err) {
+    res.status(500).send({ message: 'Error fetching properties', error: err.message });
+  }
+});
+  
+// Get interested properties (only for authenticated users and agents)
+router.get('/api/interestedProperties', verifyToken, checkRole(['user', 'agent']), async (req, res) => {
+  try {
+    const userId = req.session.user._id;
+    console.log("userID", userId);
+
+    const properties = await Interest.find({ OwnID: userId });
+    properties.forEach(property => console.log("Property OwnID:", property.OwnID));
+
+    res.json(properties);
+  } catch (err) {
+    console.error("Failed to fetch properties:", err);
+    res.status(500).send({ message: 'Error fetching properties', error: err.message });
+  }
+});
   //save interested properties
   router.post('/api/interestedProperties', async (req, res) => {
     const sessionData = req.session.user;

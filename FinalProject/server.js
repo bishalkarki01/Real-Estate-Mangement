@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 var bodyParser = require('body-parser');
 var app = express();
 
+
 app.use(session({
     secret: 'A SECRET KEY. SHOULD BE UNIQUE TO THE APP. DONT EVER SHOW IT TO ANYONE',
     resave: true,
